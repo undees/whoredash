@@ -101,6 +101,22 @@ export class WhoreDash extends LitElement {
     this._save();
   }
 
+  _renameItem(e) {
+    const { id, name } = e.detail;
+    this._list = {
+      floatingItems: this._list.floatingItems.map(item =>
+        item.id === id ? { ...item, name } : item
+      ),
+      aisles: this._list.aisles.map(aisle => ({
+        ...aisle,
+        items: aisle.items.map(item =>
+          item.id === id ? { ...item, name } : item
+        ),
+      })),
+    };
+    this._save();
+  }
+
   _clearList() {
     if (isListEmpty(this._list)) return;
     this._list = emptyList();
@@ -121,7 +137,7 @@ export class WhoreDash extends LitElement {
 
       ${isListEmpty(this._list)
         ? html`<p class="empty">The list is empty.<br>Your whore is free… for now.</p>`
-        : html`<grocery-list .listData=${this._list} @remove-item=${this._removeItem}></grocery-list>`
+        : html`<grocery-list .listData=${this._list} @remove-item=${this._removeItem} @rename-item=${this._renameItem}></grocery-list>`
       }
 
       <share-button .items=${this._list}></share-button>
