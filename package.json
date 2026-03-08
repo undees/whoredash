@@ -5,6 +5,7 @@
   "scripts": {
     "build": "bun build src/app.js --outdir=public --minify",
     "dev": "bun build src/app.js --outdir=public --watch",
+    "test": "bun test",
     "serve": "bun serve.js"
   },
   "dependencies": {

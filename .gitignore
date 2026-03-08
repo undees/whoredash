@@ -1,6 +1,11 @@
 # dependencies (bun install)
 node_modules
 
+# python (playwright tests)
+.venv
+__pycache__
+.pytest_cache
+
 # build output
 public/app.js
 
