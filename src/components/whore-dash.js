@@ -1,6 +1,7 @@
 import { LitElement, html, css } from 'lit';
 import { generateId, migrateList, emptyList, isListEmpty, moveItemToAisle } from '../utils.js';
 import { defaults as aisleDefaults } from '../aisle-defaults.js';
+import { lookupFamilect } from '../familect.js';
 
 function findAisleLabel(name) {
   const n = name.toLowerCase();
@@ -103,7 +104,8 @@ export class WhoreDash extends LitElement {
     const name = e.detail.name.trim();
     if (!name) return;
 
-    const aisleLabel = findAisleLabel(name);
+    const canonical = lookupFamilect(name) ?? name;
+    const aisleLabel = findAisleLabel(canonical);
     const existingAisle = aisleLabel && this._list.aisles.find(
       a => a.name.toLowerCase() === aisleLabel.toLowerCase()
     );

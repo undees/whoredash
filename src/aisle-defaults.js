@@ -14,6 +14,10 @@ export const defaults = [
   ['almond milk', 'Dairy'],
   ['oat milk', 'Dairy'],
   ['soy milk', 'Dairy'],
+  ['half & half', 'Dairy'],
+  ['half \'n\' half', 'Dairy'],
+  ['half-and-half', 'Dairy'],
+  ['creamer', 'Dairy'],
   ['sour cream', 'Dairy'],
   ['heavy cream', 'Dairy'],
   ['whipping cream', 'Dairy'],
@@ -154,6 +158,9 @@ export const defaults = [
   ['tortilla', 'Bakery'],
   ['cake', 'Bakery'],
   ['tart', 'Bakery'],
+
+  // Deli
+  ['plant-based', 'Deli'],
 
   // Seafood
   ['salmon', 'Seafood'],

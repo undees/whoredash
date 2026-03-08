@@ -1,4 +1,5 @@
 import { LitElement, html, css, svg } from 'lit';
+import { lookupFamilect } from '../familect.js';
 
 const undoArrow = svg`<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
   <path d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"/>
@@ -241,6 +242,33 @@ export class GroceryList extends LitElement {
     .aisle-option--none:hover {
       color: var(--text);
     }
+
+    @keyframes shimmer {
+      0%   { background-position: -200% center; }
+      100% { background-position:  200% center; }
+    }
+
+    .item--familect {
+      background: linear-gradient(
+        90deg,
+        var(--pink-100) 0%,
+        var(--pink-50)  40%,
+        var(--white)    50%,
+        var(--pink-50)  60%,
+        var(--pink-100) 100%
+      );
+      background-size: 200% auto;
+      animation: shimmer 2s ease-out;
+      border-color: var(--pink-300);
+    }
+
+    .item-subtitle {
+      flex-basis: 100%;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      padding: 0.1rem 0 0;
+      pointer-events: none;
+    }
   `;
 
   constructor() {
@@ -383,8 +411,10 @@ export class GroceryList extends LitElement {
     }
     const aisles = this.listData.aisles ?? [];
     const isPicking = this._movingItemId === item.id;
+    const subtitle = lookupFamilect(item.name);
+    const displayName = subtitle ? `✨ ${item.name} ✨` : item.name;
     return html`
-      <li>
+      <li class=${subtitle ? 'item--familect' : ''}>
         ${aisles.length > 0 ? html`
           <button
             class="move-btn"
@@ -393,8 +423,9 @@ export class GroceryList extends LitElement {
             @click=${() => this._toggleMove(item)}
           >↕</button>
         ` : ''}
-        <button class="item-name" @click=${() => this._startItemEdit(item)} aria-label="Edit ${item.name}">${item.name}</button>
+        <button class="item-name" @click=${() => this._startItemEdit(item)} aria-label="Edit ${item.name}">${displayName}</button>
         <button class="remove-btn" @click=${() => this._remove(item.id)} aria-label="Remove ${item.name}">&times;</button>
+        ${subtitle ? html`<span class="item-subtitle">${subtitle}</span>` : ''}
         ${isPicking ? html`
           <div class="aisle-picker">
             ${aisles.map(aisle => html`
