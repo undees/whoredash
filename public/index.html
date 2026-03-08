@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WhoreDash</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%23d4567a'/><text x='50' y='68' font-size='52' font-family='system-ui' font-weight='bold' fill='white' text-anchor='middle'>Wh</text></svg>">
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --pink-50: #fdf2f4;
+      --pink-100: #fce7eb;
+      --pink-200: #f9ced8;
+      --pink-400: #e8628c;
+      --pink-500: #d4567a;
+      --pink-600: #b83d62;
+      --pink-700: #8c2d4a;
+      --pink-800: #6b2239;
+      --text: #3d1523;
+      --text-muted: #8c6070;
+      --white: #ffffff;
+      --radius: 10px;
+      --shadow: 0 2px 8px rgba(140, 45, 74, 0.12);
+    }
+
+    html {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--pink-50);
+      color: var(--text);
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      min-height: 100dvh;
+      display: flex;
+      justify-content: center;
+      padding: 1rem;
+    }
+  </style>
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <whore-dash></whore-dash>
+</body>
+</html>

@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: whoredash
+    runtime: static
+    buildCommand: bun install && bun run build
+    staticPublishPath: ./public

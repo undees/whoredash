@@ -1,0 +1,13 @@
+{
+  "name": "whoredash",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "bun build src/app.js --outdir=public --minify",
+    "dev": "bun build src/app.js --outdir=public --watch",
+    "serve": "bun serve.js"
+  },
+  "dependencies": {
+    "lit": "^3.3.2"
+  }
+}
