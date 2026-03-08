@@ -1,4 +1,5 @@
 import { LitElement, html, css } from 'lit';
+import { generateId, migrateList, emptyList, isListEmpty } from '../utils.js';
 import './add-item.js';
 import './grocery-list.js';
 import './share-button.js';
@@ -7,7 +8,7 @@ const STORAGE_KEY = 'whoredash-list';
 
 export class WhoreDash extends LitElement {
   static properties = {
-    items: { type: Array, state: true },
+    _list: { type: Object, state: true },
   };
 
   static styles = css`
@@ -71,37 +72,38 @@ export class WhoreDash extends LitElement {
 
   constructor() {
     super();
-    this.items = this._load();
-  }
-
-  _load() {
-    try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-    } catch {
-      return [];
-    }
+    this._list = migrateList(localStorage.getItem(STORAGE_KEY));
   }
 
   _save() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(this.items));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(this._list));
   }
 
   _addItem(e) {
     const name = e.detail.name.trim();
     if (!name) return;
-    this.items = [...this.items, name];
+    this._list = {
+      ...this._list,
+      floatingItems: [...this._list.floatingItems, { id: generateId(), name }],
+    };
     this._save();
   }
 
   _removeItem(e) {
-    const idx = e.detail.index;
-    this.items = this.items.filter((_, i) => i !== idx);
+    const { id } = e.detail;
+    this._list = {
+      floatingItems: this._list.floatingItems.filter(item => item.id !== id),
+      aisles: this._list.aisles.map(aisle => ({
+        ...aisle,
+        items: aisle.items.filter(item => item.id !== id),
+      })),
+    };
     this._save();
   }
 
   _clearList() {
-    if (this.items.length === 0) return;
-    this.items = [];
+    if (isListEmpty(this._list)) return;
+    this._list = emptyList();
     this._save();
   }
 
@@ -117,12 +119,12 @@ export class WhoreDash extends LitElement {
         <button class="clear-btn" @click=${this._clearList}>Forget Everything</button>
       </div>
 
-      ${this.items.length === 0
+      ${isListEmpty(this._list)
         ? html`<p class="empty">The list is empty.<br>Your whore is free… for now.</p>`
-        : html`<grocery-list .items=${this.items} @remove-item=${this._removeItem}></grocery-list>`
+        : html`<grocery-list .listData=${this._list} @remove-item=${this._removeItem}></grocery-list>`
       }
 
-      <share-button .items=${this.items}></share-button>
+      <share-button .items=${this._list}></share-button>
     `;
   }
 }

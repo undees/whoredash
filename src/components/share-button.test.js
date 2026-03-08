@@ -1,5 +1,6 @@
 import { test, expect, describe } from 'bun:test';
-import { formatShareText, isListEmpty } from './share-button.js';
+import { formatShareText } from './share-button.js';
+import { isListEmpty } from '../utils.js';
 
 describe('formatShareText', () => {
   test('formats a legacy flat string array', () => {

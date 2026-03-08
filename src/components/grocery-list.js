@@ -2,7 +2,7 @@ import { LitElement, html, css } from 'lit';
 
 export class GroceryList extends LitElement {
   static properties = {
-    items: { type: Array },
+    listData: { type: Object },
   };
 
   static styles = css`
@@ -58,31 +58,65 @@ export class GroceryList extends LitElement {
       background: var(--pink-400);
       color: var(--white);
     }
+
+    .aisle-header {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin: 1.25rem 0 0.5rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--pink-600);
+    }
+
+    .aisle-header::before {
+      content: '❧';
+      font-size: 1rem;
+      font-style: normal;
+    }
+
+    .aisle-section > ul {
+      margin-top: 0;
+    }
   `;
 
   constructor() {
     super();
-    this.items = [];
+    this.listData = { floatingItems: [], aisles: [] };
   }
 
-  _remove(index) {
+  _remove(id, name) {
     this.dispatchEvent(new CustomEvent('remove-item', {
-      detail: { index },
+      detail: { id },
       bubbles: true,
       composed: true,
     }));
   }
 
-  render() {
+  _renderItem(item) {
     return html`
-      <ul>
-        ${this.items.map((item, i) => html`
-          <li>
-            <span class="item-name">${item}</span>
-            <button class="remove-btn" @click=${() => this._remove(i)} aria-label="Remove ${item}">&times;</button>
-          </li>
-        `)}
-      </ul>
+      <li>
+        <span class="item-name">${item.name}</span>
+        <button class="remove-btn" @click=${() => this._remove(item.id)} aria-label="Remove ${item.name}">&times;</button>
+      </li>
+    `;
+  }
+
+  render() {
+    const { floatingItems = [], aisles = [] } = this.listData;
+    return html`
+      ${floatingItems.length > 0 ? html`
+        <ul>${floatingItems.map(item => this._renderItem(item))}</ul>
+      ` : ''}
+
+      ${aisles.map(aisle => html`
+        <div class="aisle-section">
+          <p class="aisle-header">${aisle.name}</p>
+          <ul>${aisle.items.map(item => this._renderItem(item))}</ul>
+        </div>
+      `)}
     `;
   }
 }

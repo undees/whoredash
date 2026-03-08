@@ -1,10 +1,6 @@
 import { LitElement, html, css } from 'lit';
+import { isListEmpty } from '../utils.js';
 
-/**
- * Formats the list data for sharing.
- * Accepts either a legacy flat string array or the new structured format
- * { floatingItems: [{id, name}], aisles: [{id, name, items: [{id, name}]}] }.
- */
 export function formatShareText(data) {
   const sections = [];
 
@@ -24,15 +20,9 @@ export function formatShareText(data) {
   return `🛒 WhoreDash List\n\n${sections.join('\n\n')}`;
 }
 
-export function isListEmpty(data) {
-  if (Array.isArray(data)) return data.length === 0;
-  const { floatingItems = [], aisles = [] } = data;
-  return floatingItems.length === 0 && aisles.every(a => a.items.length === 0);
-}
-
 export class ShareButton extends LitElement {
   static properties = {
-    items: { type: Array },
+    items: { type: Object },
   };
 
   static styles = css`
