@@ -39,13 +39,13 @@ export class AddItem extends LitElement {
       border-color: var(--pink-400);
     }
 
-    button {
+    .btn-add {
       flex: none;
       padding: 0.6rem 1rem;
       background: var(--pink-500);
       color: var(--white);
       border: 2px solid var(--pink-500);
-      border-radius: 0 var(--radius) var(--radius) 0;
+      border-radius: 0;
       font: inherit;
       font-size: 0.95rem;
       font-weight: 600;
@@ -53,9 +53,29 @@ export class AddItem extends LitElement {
       transition: background 0.15s;
     }
 
-    button:hover {
+    .btn-add:hover {
       background: var(--pink-600);
       border-color: var(--pink-600);
+    }
+
+    .btn-aisle {
+      flex: none;
+      padding: 0.6rem 0.75rem;
+      background: var(--pink-100);
+      color: var(--pink-700);
+      border: 2px solid var(--pink-200);
+      border-left: none;
+      border-radius: 0 var(--radius) var(--radius) 0;
+      font: inherit;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+
+    .btn-aisle:hover {
+      background: var(--pink-200);
     }
   `;
 
@@ -70,9 +90,24 @@ export class AddItem extends LitElement {
 
   _submit(e) {
     e.preventDefault();
+    this._addItem();
+  }
+
+  _addItem() {
     const name = this._value.trim();
     if (!name) return;
     this.dispatchEvent(new CustomEvent('add-item', {
+      detail: { name },
+      bubbles: true,
+      composed: true,
+    }));
+    this._value = '';
+  }
+
+  _addAisle() {
+    const name = this._value.trim();
+    if (!name) return;
+    this.dispatchEvent(new CustomEvent('add-aisle', {
       detail: { name },
       bubbles: true,
       composed: true,
@@ -89,7 +124,8 @@ export class AddItem extends LitElement {
           .value=${this._value}
           @input=${this._onInput}
         >
-        <button type="submit">Add</button>
+        <button type="button" class="btn-add" @click=${this._addItem}>Add</button>
+        <button type="button" class="btn-aisle" @click=${this._addAisle}>+ Aisle</button>
       </form>
     `;
   }

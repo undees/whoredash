@@ -55,8 +55,8 @@ describe('isListEmpty', () => {
     expect(isListEmpty(['Milk'])).toBe(false);
   });
 
-  test('returns true when no floating items and all aisles are empty', () => {
-    expect(isListEmpty({ floatingItems: [], aisles: [{ id: 'x', name: 'Produce', items: [] }] })).toBe(true);
+  test('returns false when an aisle exists even if it has no items', () => {
+    expect(isListEmpty({ floatingItems: [], aisles: [{ id: 'x', name: 'Produce', items: [] }] })).toBe(false);
   });
 
   test('returns false when there are floating items', () => {

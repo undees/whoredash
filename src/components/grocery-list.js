@@ -7,8 +7,10 @@ const undoArrow = svg`<svg width="1em" height="1em" viewBox="0 0 24 24" fill="no
 export class GroceryList extends LitElement {
   static properties = {
     listData: { type: Object },
-    _editingId: { type: String, state: true },
-    _editingName: { type: String, state: true },
+    _editingItemId: { type: String, state: true },
+    _editingItemName: { type: String, state: true },
+    _editingAisleId: { type: String, state: true },
+    _editingAisleName: { type: String, state: true },
   };
 
   static styles = css`
@@ -19,6 +21,7 @@ export class GroceryList extends LitElement {
     ul {
       list-style: none;
       margin: 1rem 0 0;
+      padding: 0;
     }
 
     li {
@@ -113,17 +116,68 @@ export class GroceryList extends LitElement {
       align-items: center;
       gap: 0.4rem;
       margin: 1.25rem 0 0.5rem;
-      font-size: 0.8rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--pink-600);
     }
 
     .aisle-header::before {
       content: '❧';
       font-size: 1rem;
-      font-style: normal;
+      color: var(--pink-400);
+      flex: none;
+    }
+
+    .aisle-name-btn {
+      flex: 1;
+      min-width: 0;
+      background: none;
+      border: none;
+      padding: 0;
+      font: inherit;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--pink-600);
+      text-align: left;
+      cursor: pointer;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      transition: color 0.15s;
+    }
+
+    .aisle-name-btn:hover {
+      color: var(--pink-800);
+    }
+
+    .aisle-edit-input {
+      flex: 1;
+      min-width: 0;
+      padding: 0.1rem 0.3rem;
+      border: 2px solid var(--pink-400);
+      border-radius: calc(var(--radius) / 2);
+      font: inherit;
+      font-size: 0.85rem;
+      color: var(--text);
+      background: var(--white);
+      outline: none;
+    }
+
+    .aisle-action-btn {
+      flex: none;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font: inherit;
+      font-size: 1.1rem;
+      cursor: pointer;
+      padding: 0.1rem 0.3rem;
+      border-radius: calc(var(--radius) / 2);
+      transition: color 0.15s;
+      line-height: 1;
+    }
+
+    .aisle-action-btn:hover {
+      color: var(--pink-600);
     }
 
     .aisle-section > ul {
@@ -134,51 +188,89 @@ export class GroceryList extends LitElement {
   constructor() {
     super();
     this.listData = { floatingItems: [], aisles: [] };
-    this._editingId = null;
-    this._editingName = '';
+    this._editingItemId = null;
+    this._editingItemName = '';
+    this._editingAisleId = null;
+    this._editingAisleName = '';
   }
 
   updated(changedProps) {
-    if (changedProps.has('_editingId') && this._editingId) {
+    if (changedProps.has('_editingItemId') && this._editingItemId) {
       const input = this.shadowRoot.querySelector('.edit-input');
-      if (input) {
-        input.focus();
-        input.select();
-      }
+      if (input) { input.focus(); input.select(); }
+    }
+    if (changedProps.has('_editingAisleId') && this._editingAisleId) {
+      const input = this.shadowRoot.querySelector('.aisle-edit-input');
+      if (input) { input.focus(); input.select(); }
     }
   }
 
-  _startEdit(item) {
-    this._editingId = item.id;
-    this._editingName = item.name;
+  _startItemEdit(item) {
+    this._editingAisleId = null;
+    this._editingItemId = item.id;
+    this._editingItemName = item.name;
   }
 
-  _saveEdit() {
-    if (!this._editingId) return;
-    const name = this._editingName.trim();
+  _saveItemEdit() {
+    if (!this._editingItemId) return;
+    const name = this._editingItemName.trim();
     if (name) {
       this.dispatchEvent(new CustomEvent('rename-item', {
-        detail: { id: this._editingId, name },
+        detail: { id: this._editingItemId, name },
         bubbles: true,
         composed: true,
       }));
     }
-    this._editingId = null;
-    this._editingName = '';
+    this._editingItemId = null;
+    this._editingItemName = '';
   }
 
-  _cancelEdit() {
-    this._editingId = null;
-    this._editingName = '';
+  _cancelItemEdit() {
+    this._editingItemId = null;
+    this._editingItemName = '';
   }
 
-  _onEditKeydown(e) {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      this._saveEdit();
-    } else if (e.key === 'Escape') {
-      this._cancelEdit();
+  _onItemEditKeydown(e) {
+    if (e.key === 'Enter') { e.preventDefault(); this._saveItemEdit(); }
+    else if (e.key === 'Escape') { this._cancelItemEdit(); }
+  }
+
+  _startAisleEdit(aisle) {
+    this._editingItemId = null;
+    this._editingAisleId = aisle.id;
+    this._editingAisleName = aisle.name;
+  }
+
+  _saveAisleEdit() {
+    if (!this._editingAisleId) return;
+    const name = this._editingAisleName.trim();
+    if (name) {
+      this.dispatchEvent(new CustomEvent('rename-aisle', {
+        detail: { id: this._editingAisleId, name },
+        bubbles: true,
+        composed: true,
+      }));
     }
+    this._editingAisleId = null;
+    this._editingAisleName = '';
+  }
+
+  _cancelAisleEdit() {
+    this._editingAisleId = null;
+    this._editingAisleName = '';
+  }
+
+  _onAisleEditKeydown(e) {
+    if (e.key === 'Enter') { e.preventDefault(); this._saveAisleEdit(); }
+    else if (e.key === 'Escape') { this._cancelAisleEdit(); }
+  }
+
+  _deleteAisle(id) {
+    this.dispatchEvent(new CustomEvent('delete-aisle', {
+      detail: { id },
+      bubbles: true,
+      composed: true,
+    }));
   }
 
   _remove(id) {
@@ -190,27 +282,27 @@ export class GroceryList extends LitElement {
   }
 
   _renderItem(item) {
-    if (this._editingId === item.id) {
+    if (this._editingItemId === item.id) {
       return html`
         <li>
           <input
             class="edit-input"
-            .value=${this._editingName}
-            @input=${e => { this._editingName = e.target.value; }}
-            @keydown=${this._onEditKeydown}
-            @blur=${this._saveEdit}
+            .value=${this._editingItemName}
+            @input=${e => { this._editingItemName = e.target.value; }}
+            @keydown=${this._onItemEditKeydown}
+            @blur=${this._saveItemEdit}
             aria-label="Edit ${item.name}"
           >
           <button
             class="cancel-edit-btn"
             @mousedown=${e => e.preventDefault()}
-            @click=${this._cancelEdit}
+            @click=${this._cancelItemEdit}
             aria-label="Cancel edit"
           >${undoArrow}</button>
           <button
             class="remove-btn"
             @mousedown=${e => e.preventDefault()}
-            @click=${() => { this._cancelEdit(); this._remove(item.id); }}
+            @click=${() => { this._cancelItemEdit(); this._remove(item.id); }}
             aria-label="Remove ${item.name}"
           >&times;</button>
         </li>
@@ -218,9 +310,50 @@ export class GroceryList extends LitElement {
     }
     return html`
       <li>
-        <button class="item-name" @click=${() => this._startEdit(item)} aria-label="Edit ${item.name}">${item.name}</button>
+        <button class="item-name" @click=${() => this._startItemEdit(item)} aria-label="Edit ${item.name}">${item.name}</button>
         <button class="remove-btn" @click=${() => this._remove(item.id)} aria-label="Remove ${item.name}">&times;</button>
       </li>
+    `;
+  }
+
+  _renderAisle(aisle) {
+    const header = this._editingAisleId === aisle.id
+      ? html`
+        <div class="aisle-header">
+          <input
+            class="aisle-edit-input"
+            .value=${this._editingAisleName}
+            @input=${e => { this._editingAisleName = e.target.value; }}
+            @keydown=${this._onAisleEditKeydown}
+            @blur=${this._saveAisleEdit}
+            aria-label="Rename aisle"
+          >
+          <button
+            class="aisle-action-btn"
+            @mousedown=${e => e.preventDefault()}
+            @click=${this._cancelAisleEdit}
+            aria-label="Cancel rename"
+          >${undoArrow}</button>
+          <button
+            class="aisle-action-btn"
+            @mousedown=${e => e.preventDefault()}
+            @click=${() => { this._cancelAisleEdit(); this._deleteAisle(aisle.id); }}
+            aria-label="Delete aisle"
+          >&times;</button>
+        </div>
+      `
+      : html`
+        <div class="aisle-header">
+          <button class="aisle-name-btn" @click=${() => this._startAisleEdit(aisle)} aria-label="Rename aisle ${aisle.name}">${aisle.name}</button>
+          <button class="aisle-action-btn" @click=${() => this._deleteAisle(aisle.id)} aria-label="Delete aisle ${aisle.name}">&times;</button>
+        </div>
+      `;
+
+    return html`
+      <div class="aisle-section">
+        ${header}
+        <ul>${aisle.items.map(item => this._renderItem(item))}</ul>
+      </div>
     `;
   }
 
@@ -230,13 +363,7 @@ export class GroceryList extends LitElement {
       ${floatingItems.length > 0 ? html`
         <ul>${floatingItems.map(item => this._renderItem(item))}</ul>
       ` : ''}
-
-      ${aisles.map(aisle => html`
-        <div class="aisle-section">
-          <p class="aisle-header">${aisle.name}</p>
-          <ul>${aisle.items.map(item => this._renderItem(item))}</ul>
-        </div>
-      `)}
+      ${aisles.map(aisle => this._renderAisle(aisle))}
     `;
   }
 }

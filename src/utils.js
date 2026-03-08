@@ -9,7 +9,7 @@ export function emptyList() {
 export function isListEmpty(data) {
   if (!data || Array.isArray(data)) return !data || data.length === 0;
   const { floatingItems = [], aisles = [] } = data;
-  return floatingItems.length === 0 && aisles.every(a => a.items.length === 0);
+  return floatingItems.length === 0 && aisles.length === 0;
 }
 
 function isValidList(data) {

@@ -38,7 +38,7 @@ def test_forget_everything_clears_list(page: Page, base_url: str):
     input_el.fill("Milk")
     input_el.press("Enter")
 
-    page.locator("whore-dash").locator(".clear-btn").click()
+    page.locator("whore-dash").locator(".forget-btn").click()
 
     empty = page.locator("whore-dash").locator(".empty")
     expect(empty).to_be_visible()

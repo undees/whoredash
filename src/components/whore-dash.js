@@ -5,6 +5,8 @@ import './grocery-list.js';
 import './share-button.js';
 
 const STORAGE_KEY = 'whoredash-list';
+const HISTORY_KEY = 'whoredash-history';
+const BURN_IT_ALL_DOWN = 'BURN IT ALL DOWN';
 
 export class WhoreDash extends LitElement {
   static properties = {
@@ -38,27 +40,7 @@ export class WhoreDash extends LitElement {
     }
 
     .actions {
-      display: flex;
-      gap: 0.5rem;
       margin-top: 1.25rem;
-    }
-
-    .clear-btn {
-      flex: none;
-      background: var(--pink-100);
-      color: var(--pink-700);
-      border: 1px solid var(--pink-200);
-      border-radius: var(--radius);
-      padding: 0.6rem 1rem;
-      font: inherit;
-      font-size: 0.85rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.15s;
-    }
-
-    .clear-btn:hover {
-      background: var(--pink-200);
     }
 
     .empty {
@@ -67,6 +49,28 @@ export class WhoreDash extends LitElement {
       padding: 2.5rem 1rem;
       font-size: 0.95rem;
       line-height: 1.5;
+    }
+
+    .forget-btn {
+      display: block;
+      width: 100%;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font: inherit;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      text-align: center;
+      cursor: pointer;
+      padding: 0.75rem 0;
+      margin-top: 0.5rem;
+      transition: color 0.15s;
+    }
+
+    .forget-btn:hover {
+      color: var(--pink-600);
     }
   `;
 
@@ -101,6 +105,44 @@ export class WhoreDash extends LitElement {
     this._save();
   }
 
+  _addAisle(e) {
+    const name = e.detail.name.trim();
+    if (!name) return;
+
+    if (name === BURN_IT_ALL_DOWN) {
+      localStorage.removeItem(HISTORY_KEY);
+      return;
+    }
+
+    this._list = {
+      ...this._list,
+      aisles: [...this._list.aisles, { id: generateId(), name, items: [] }],
+    };
+    this._save();
+  }
+
+  _renameAisle(e) {
+    const { id, name } = e.detail;
+    this._list = {
+      ...this._list,
+      aisles: this._list.aisles.map(aisle =>
+        aisle.id === id ? { ...aisle, name } : aisle
+      ),
+    };
+    this._save();
+  }
+
+  _deleteAisle(e) {
+    const { id } = e.detail;
+    const aisle = this._list.aisles.find(a => a.id === id);
+    if (!aisle) return;
+    this._list = {
+      floatingItems: [...this._list.floatingItems, ...aisle.items],
+      aisles: this._list.aisles.filter(a => a.id !== id),
+    };
+    this._save();
+  }
+
   _renameItem(e) {
     const { id, name } = e.detail;
     this._list = {
@@ -131,16 +173,23 @@ export class WhoreDash extends LitElement {
       </header>
 
       <div class="actions">
-        <add-item @add-item=${this._addItem}></add-item>
-        <button class="clear-btn" @click=${this._clearList}>Forget Everything</button>
+        <add-item @add-item=${this._addItem} @add-aisle=${this._addAisle}></add-item>
       </div>
 
       ${isListEmpty(this._list)
         ? html`<p class="empty">The list is empty.<br>Your whore is free… for now.</p>`
-        : html`<grocery-list .listData=${this._list} @remove-item=${this._removeItem} @rename-item=${this._renameItem}></grocery-list>`
+        : html`<grocery-list
+            .listData=${this._list}
+            @remove-item=${this._removeItem}
+            @rename-item=${this._renameItem}
+            @rename-aisle=${this._renameAisle}
+            @delete-aisle=${this._deleteAisle}
+          ></grocery-list>`
       }
 
       <share-button .items=${this._list}></share-button>
+
+      <button class="forget-btn" @click=${this._clearList}>Forget Everything</button>
     `;
   }
 }
