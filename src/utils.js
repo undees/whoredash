@@ -12,6 +12,12 @@ export function isListEmpty(data) {
   return floatingItems.length === 0 && aisles.length === 0;
 }
 
+export function listHasItems(data) {
+  if (!data || Array.isArray(data)) return Array.isArray(data) && data.length > 0;
+  const { floatingItems = [], aisles = [] } = data;
+  return floatingItems.length > 0 || aisles.some(a => a.items.length > 0);
+}
+
 function isValidList(data) {
   return (
     data !== null &&

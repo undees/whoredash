@@ -21,11 +21,11 @@ def test_add_and_remove_item(page: Page, base_url: str):
     page.reload()
 
     input_el = page.locator("add-item").locator("input")
-    input_el.fill("Milk")
+    input_el.fill("wormhole")
     input_el.press("Enter")
 
     item = page.locator("grocery-list").locator(".item-name")
-    expect(item).to_have_text("Milk")
+    expect(item).to_have_text("wormhole")
 
     remove_btn = page.locator("grocery-list").locator(".remove-btn")
     remove_btn.click()

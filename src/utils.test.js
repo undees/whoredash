@@ -1,5 +1,5 @@
 import { test, expect, describe } from 'bun:test';
-import { generateId, migrateList, isListEmpty, emptyList, moveItemToAisle } from './utils.js';
+import { generateId, migrateList, isListEmpty, listHasItems, emptyList, moveItemToAisle } from './utils.js';
 
 describe('generateId', () => {
   test('returns a non-empty string', () => {
@@ -91,6 +91,28 @@ describe('isListEmpty', () => {
 
   test('false when an aisle exists even if it has no items', () => {
     expect(isListEmpty({ floatingItems: [], aisles: [{ id: 'b', name: 'Produce', items: [] }] })).toBe(false);
+  });
+});
+
+describe('listHasItems', () => {
+  test('false for empty list', () => {
+    expect(listHasItems({ floatingItems: [], aisles: [] })).toBe(false);
+  });
+
+  test('false when aisles exist but have no items', () => {
+    expect(listHasItems({ floatingItems: [], aisles: [{ id: 'a', name: 'Produce', items: [] }] })).toBe(false);
+  });
+
+  test('true when there are floating items', () => {
+    expect(listHasItems({ floatingItems: [{ id: 'x', name: 'Milk' }], aisles: [] })).toBe(true);
+  });
+
+  test('true when an aisle has items', () => {
+    const data = {
+      floatingItems: [],
+      aisles: [{ id: 'a', name: 'Produce', items: [{ id: 'b', name: 'Lettuce' }] }],
+    };
+    expect(listHasItems(data)).toBe(true);
   });
 });
 

@@ -91,11 +91,11 @@ def test_remove_while_editing_cancels_edit_and_removes(page: Page, base_url: str
     page.evaluate("localStorage.clear()")
     page.reload()
 
-    _add_item(page, "Milk")
+    _add_item(page, "wormhole")
     page.locator("grocery-list").locator(".item-name").click()
 
     edit_input = page.locator("grocery-list").locator(".edit-input")
-    edit_input.fill("Oat Milk")
+    edit_input.fill("flux capacitor")
 
     page.locator("grocery-list").locator(".remove-btn").click()
 
@@ -108,12 +108,12 @@ def test_edit_persists_to_localstorage(page: Page, base_url: str):
     page.evaluate("localStorage.clear()")
     page.reload()
 
-    _add_item(page, "Milk")
+    _add_item(page, "wormhole")
     page.locator("grocery-list").locator(".item-name").click()
 
     edit_input = page.locator("grocery-list").locator(".edit-input")
-    edit_input.fill("Oat Milk")
+    edit_input.fill("flux capacitor")
     edit_input.press("Enter")
 
     stored = page.evaluate("JSON.parse(localStorage.getItem('whoredash-list'))")
-    assert stored["floatingItems"][0]["name"] == "Oat Milk"
+    assert stored["floatingItems"][0]["name"] == "flux capacitor"

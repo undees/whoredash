@@ -1,5 +1,5 @@
 import { LitElement, html, css } from 'lit';
-import { isListEmpty } from '../utils.js';
+import { listHasItems } from '../utils.js';
 
 export function formatShareText(data) {
   const sections = [];
@@ -67,7 +67,7 @@ export class ShareButton extends LitElement {
   }
 
   _isEmpty() {
-    return isListEmpty(this.items);
+    return !listHasItems(this.items);
   }
 
   async _share() {

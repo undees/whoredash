@@ -19,13 +19,13 @@ def test_persists_new_schema(page: Page, base_url: str):
     page.reload()
 
     input_el = page.locator("add-item").locator("input")
-    input_el.fill("Eggs")
+    input_el.fill("wormhole")
     input_el.press("Enter")
 
     stored = page.evaluate("JSON.parse(localStorage.getItem('whoredash-list'))")
     assert "floatingItems" in stored
     assert "aisles" in stored
-    assert stored["floatingItems"][0]["name"] == "Eggs"
+    assert stored["floatingItems"][0]["name"] == "wormhole"
     assert "id" in stored["floatingItems"][0]
 
 

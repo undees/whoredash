@@ -1,5 +1,21 @@
 import { LitElement, html, css } from 'lit';
 import { generateId, migrateList, emptyList, isListEmpty, moveItemToAisle } from '../utils.js';
+import { defaults as aisleDefaults } from '../aisle-defaults.js';
+
+function findAisleLabel(name) {
+  const n = name.toLowerCase();
+  let bestAisle = null;
+  let bestLen = 0;
+  for (const [key, aisle] of aisleDefaults) {
+    if (key instanceof RegExp) {
+      const m = n.match(key);
+      if (m && m[0].length > bestLen) { bestLen = m[0].length; bestAisle = aisle; }
+    } else if (n.includes(key) && key.length > bestLen) {
+      bestLen = key.length; bestAisle = aisle;
+    }
+  }
+  return bestAisle;
+}
 import './add-item.js';
 import './grocery-list.js';
 import './share-button.js';
@@ -86,10 +102,33 @@ export class WhoreDash extends LitElement {
   _addItem(e) {
     const name = e.detail.name.trim();
     if (!name) return;
-    this._list = {
-      ...this._list,
-      floatingItems: [...this._list.floatingItems, { id: generateId(), name }],
-    };
+
+    const aisleLabel = findAisleLabel(name);
+    const existingAisle = aisleLabel && this._list.aisles.find(
+      a => a.name.toLowerCase() === aisleLabel.toLowerCase()
+    );
+
+    if (existingAisle) {
+      this._list = {
+        ...this._list,
+        aisles: this._list.aisles.map(a =>
+          a.id === existingAisle.id
+            ? { ...a, items: [...a.items, { id: generateId(), name }] }
+            : a
+        ),
+      };
+    } else if (aisleLabel) {
+      const newAisle = { id: generateId(), name: aisleLabel, items: [{ id: generateId(), name }] };
+      this._list = {
+        ...this._list,
+        aisles: [...this._list.aisles, newAisle],
+      };
+    } else {
+      this._list = {
+        ...this._list,
+        floatingItems: [...this._list.floatingItems, { id: generateId(), name }],
+      };
+    }
     this._save();
   }
 
