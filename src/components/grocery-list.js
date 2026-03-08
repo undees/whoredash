@@ -11,6 +11,7 @@ export class GroceryList extends LitElement {
     _editingItemName: { type: String, state: true },
     _editingAisleId: { type: String, state: true },
     _editingAisleName: { type: String, state: true },
+    _movingItemId: { type: String, state: true },
   };
 
   static styles = css`
@@ -26,6 +27,7 @@ export class GroceryList extends LitElement {
 
     li {
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
       padding: 0.65rem 0.75rem;
@@ -183,6 +185,62 @@ export class GroceryList extends LitElement {
     .aisle-section > ul {
       margin-top: 0;
     }
+
+    .move-btn {
+      flex: none;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font: inherit;
+      font-size: 1rem;
+      line-height: 1;
+      cursor: pointer;
+      padding: 0.2rem 0.4rem 0.2rem 0;
+      border-radius: calc(var(--radius) / 2);
+      transition: color 0.15s;
+      margin-right: 0.1rem;
+    }
+
+    .move-btn:hover,
+    .move-btn[aria-expanded="true"] {
+      color: var(--pink-600);
+    }
+
+    .aisle-picker {
+      flex-basis: 100%;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      padding: 0.5rem 0 0.1rem;
+      border-top: 1px solid var(--pink-100);
+      margin-top: 0.4rem;
+    }
+
+    .aisle-option {
+      background: none;
+      border: 1px solid var(--pink-200);
+      border-radius: 999px;
+      color: var(--pink-600);
+      font: inherit;
+      font-size: 0.8rem;
+      cursor: pointer;
+      padding: 0.2rem 0.75rem;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .aisle-option:hover {
+      background: var(--pink-100);
+      border-color: var(--pink-400);
+    }
+
+    .aisle-option--none {
+      color: var(--text-muted);
+      border-style: dashed;
+    }
+
+    .aisle-option--none:hover {
+      color: var(--text);
+    }
   `;
 
   constructor() {
@@ -192,6 +250,7 @@ export class GroceryList extends LitElement {
     this._editingItemName = '';
     this._editingAisleId = null;
     this._editingAisleName = '';
+    this._movingItemId = null;
   }
 
   updated(changedProps) {
@@ -205,8 +264,22 @@ export class GroceryList extends LitElement {
     }
   }
 
+  _toggleMove(item) {
+    this._movingItemId = this._movingItemId === item.id ? null : item.id;
+  }
+
+  _selectAisle(itemId, aisleId) {
+    this._movingItemId = null;
+    this.dispatchEvent(new CustomEvent('move-item', {
+      detail: { id: itemId, aisleId },
+      bubbles: true,
+      composed: true,
+    }));
+  }
+
   _startItemEdit(item) {
     this._editingAisleId = null;
+    this._movingItemId = null;
     this._editingItemId = item.id;
     this._editingItemName = item.name;
   }
@@ -308,10 +381,28 @@ export class GroceryList extends LitElement {
         </li>
       `;
     }
+    const aisles = this.listData.aisles ?? [];
+    const isPicking = this._movingItemId === item.id;
     return html`
       <li>
+        ${aisles.length > 0 ? html`
+          <button
+            class="move-btn"
+            aria-label="Move ${item.name} to a different aisle"
+            aria-expanded="${isPicking}"
+            @click=${() => this._toggleMove(item)}
+          >↕</button>
+        ` : ''}
         <button class="item-name" @click=${() => this._startItemEdit(item)} aria-label="Edit ${item.name}">${item.name}</button>
         <button class="remove-btn" @click=${() => this._remove(item.id)} aria-label="Remove ${item.name}">&times;</button>
+        ${isPicking ? html`
+          <div class="aisle-picker">
+            ${aisles.map(aisle => html`
+              <button class="aisle-option" @click=${() => this._selectAisle(item.id, aisle.id)}>${aisle.name}</button>
+            `)}
+            <button class="aisle-option aisle-option--none" @click=${() => this._selectAisle(item.id, null)}>No aisle</button>
+          </div>
+        ` : ''}
       </li>
     `;
   }

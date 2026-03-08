@@ -1,5 +1,5 @@
 import { LitElement, html, css } from 'lit';
-import { generateId, migrateList, emptyList, isListEmpty } from '../utils.js';
+import { generateId, migrateList, emptyList, isListEmpty, moveItemToAisle } from '../utils.js';
 import './add-item.js';
 import './grocery-list.js';
 import './share-button.js';
@@ -159,6 +159,11 @@ export class WhoreDash extends LitElement {
     this._save();
   }
 
+  _moveItem(e) {
+    this._list = moveItemToAisle(this._list, e.detail.id, e.detail.aisleId);
+    this._save();
+  }
+
   _clearList() {
     if (isListEmpty(this._list)) return;
     this._list = emptyList();
@@ -184,6 +189,7 @@ export class WhoreDash extends LitElement {
             @rename-item=${this._renameItem}
             @rename-aisle=${this._renameAisle}
             @delete-aisle=${this._deleteAisle}
+            @move-item=${this._moveItem}
           ></grocery-list>`
       }
 

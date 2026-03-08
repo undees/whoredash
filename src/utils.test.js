@@ -1,5 +1,5 @@
 import { test, expect, describe } from 'bun:test';
-import { generateId, migrateList, isListEmpty, emptyList } from './utils.js';
+import { generateId, migrateList, isListEmpty, emptyList, moveItemToAisle } from './utils.js';
 
 describe('generateId', () => {
   test('returns a non-empty string', () => {
@@ -91,5 +91,45 @@ describe('isListEmpty', () => {
 
   test('false when an aisle exists even if it has no items', () => {
     expect(isListEmpty({ floatingItems: [], aisles: [{ id: 'b', name: 'Produce', items: [] }] })).toBe(false);
+  });
+});
+
+describe('moveItemToAisle', () => {
+  const list = () => ({
+    floatingItems: [{ id: 'f1', name: 'Milk' }, { id: 'f2', name: 'Bread' }],
+    aisles: [
+      { id: 'a1', name: 'Dairy', items: [{ id: 'd1', name: 'Butter' }] },
+      { id: 'a2', name: 'Produce', items: [] },
+    ],
+  });
+
+  test('moves a floating item into an aisle', () => {
+    const result = moveItemToAisle(list(), 'f1', 'a1');
+    expect(result.floatingItems.map(i => i.id)).toEqual(['f2']);
+    expect(result.aisles[0].items.map(i => i.id)).toEqual(['d1', 'f1']);
+  });
+
+  test('moves an item from one aisle to another', () => {
+    const result = moveItemToAisle(list(), 'd1', 'a2');
+    expect(result.aisles[0].items).toEqual([]);
+    expect(result.aisles[1].items[0].name).toBe('Butter');
+  });
+
+  test('moves an aisle item back to floating when aisleId is null', () => {
+    const result = moveItemToAisle(list(), 'd1', null);
+    expect(result.aisles[0].items).toEqual([]);
+    expect(result.floatingItems.map(i => i.name)).toContain('Butter');
+  });
+
+  test('moves a floating item to floating (null → null) preserving all others', () => {
+    const result = moveItemToAisle(list(), 'f1', null);
+    expect(result.floatingItems.map(i => i.id)).toContain('f1');
+    expect(result.floatingItems.map(i => i.id)).toContain('f2');
+  });
+
+  test('returns list unchanged when itemId does not exist', () => {
+    const original = list();
+    const result = moveItemToAisle(original, 'nope', 'a1');
+    expect(result).toEqual(original);
   });
 });
