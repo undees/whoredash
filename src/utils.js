@@ -12,6 +12,21 @@ export function isListEmpty(data) {
   return floatingItems.length === 0 && aisles.length === 0;
 }
 
+export function migrateHistory(raw) {
+  if (!raw) return {};
+  try {
+    const parsed = JSON.parse(raw);
+    if (typeof parsed !== 'object' || Array.isArray(parsed) || parsed === null) return {};
+    const clean = {};
+    for (const [k, v] of Object.entries(parsed)) {
+      if (typeof k === 'string' && typeof v === 'number' && v > 0) clean[k] = v;
+    }
+    return clean;
+  } catch {
+    return {};
+  }
+}
+
 export function listHasItems(data) {
   if (!data || Array.isArray(data)) return Array.isArray(data) && data.length > 0;
   const { floatingItems = [], aisles = [] } = data;

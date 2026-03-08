@@ -1,5 +1,5 @@
 import { test, expect, describe } from 'bun:test';
-import { generateId, migrateList, isListEmpty, listHasItems, emptyList, moveItemToAisle } from './utils.js';
+import { generateId, migrateList, migrateHistory, isListEmpty, listHasItems, emptyList, moveItemToAisle } from './utils.js';
 
 describe('generateId', () => {
   test('returns a non-empty string', () => {
@@ -69,6 +69,31 @@ describe('migrateList', () => {
 
   test('returns empty list for a plain number', () => {
     expect(migrateList(JSON.stringify(42))).toEqual({ floatingItems: [], aisles: [] });
+  });
+});
+
+describe('migrateHistory', () => {
+  test('returns empty object for null', () => {
+    expect(migrateHistory(null)).toEqual({});
+  });
+
+  test('returns empty object for invalid JSON', () => {
+    expect(migrateHistory('not json')).toEqual({});
+  });
+
+  test('returns empty object for a non-object value', () => {
+    expect(migrateHistory(JSON.stringify([1, 2, 3]))).toEqual({});
+    expect(migrateHistory(JSON.stringify(42))).toEqual({});
+  });
+
+  test('parses a valid history object', () => {
+    const raw = JSON.stringify({ Milk: 5, Bread: 2 });
+    expect(migrateHistory(raw)).toEqual({ Milk: 5, Bread: 2 });
+  });
+
+  test('strips entries with non-numeric or zero counts', () => {
+    const raw = JSON.stringify({ Milk: 5, Bad: 'oops', Zero: 0 });
+    expect(migrateHistory(raw)).toEqual({ Milk: 5 });
   });
 });
 

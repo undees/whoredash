@@ -100,6 +100,18 @@ export class WhoreDash extends LitElement {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(this._list));
   }
 
+  _recordHistory(name) {
+    let history;
+    try {
+      history = JSON.parse(localStorage.getItem(HISTORY_KEY)) ?? {};
+    } catch {
+      history = {};
+    }
+    if (typeof history !== 'object' || Array.isArray(history)) history = {};
+    history[name] = (history[name] ?? 0) + 1;
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+  }
+
   _addItem(e) {
     const name = e.detail.name.trim();
     if (!name) return;
@@ -131,6 +143,7 @@ export class WhoreDash extends LitElement {
         floatingItems: [...this._list.floatingItems, { id: generateId(), name }],
       };
     }
+    this._recordHistory(name);
     this._save();
   }
 
