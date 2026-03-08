@@ -1,5 +1,5 @@
 import { test, expect, describe } from 'bun:test';
-import { generateId, migrateList, migrateHistory, isListEmpty, listHasItems, emptyList, moveItemToAisle } from './utils.js';
+import { generateId, migrateList, migrateHistory, topItems, isListEmpty, listHasItems, emptyList, moveItemToAisle } from './utils.js';
 
 describe('generateId', () => {
   test('returns a non-empty string', () => {
@@ -94,6 +94,24 @@ describe('migrateHistory', () => {
   test('strips entries with non-numeric or zero counts', () => {
     const raw = JSON.stringify({ Milk: 5, Bad: 'oops', Zero: 0 });
     expect(migrateHistory(raw)).toEqual({ Milk: 5 });
+  });
+});
+
+describe('topItems', () => {
+  test('returns items sorted by count descending', () => {
+    const history = { Milk: 3, Bread: 7, Eggs: 1 };
+    expect(topItems(history)).toEqual(['Bread', 'Milk', 'Eggs']);
+  });
+
+  test('caps at n items', () => {
+    const history = Object.fromEntries(
+      Array.from({ length: 12 }, (_, i) => [`item${i}`, 12 - i])
+    );
+    expect(topItems(history, 9)).toHaveLength(9);
+  });
+
+  test('returns empty array for empty history', () => {
+    expect(topItems({})).toEqual([]);
   });
 });
 

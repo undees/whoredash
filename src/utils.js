@@ -12,6 +12,13 @@ export function isListEmpty(data) {
   return floatingItems.length === 0 && aisles.length === 0;
 }
 
+export function topItems(history, n = 9) {
+  return Object.entries(history)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, n)
+    .map(([name]) => name);
+}
+
 export function migrateHistory(raw) {
   if (!raw) return {};
   try {

@@ -1,5 +1,5 @@
 import { LitElement, html, css } from 'lit';
-import { generateId, migrateList, emptyList, isListEmpty, moveItemToAisle } from '../utils.js';
+import { generateId, migrateList, migrateHistory, emptyList, isListEmpty, moveItemToAisle } from '../utils.js';
 import { defaults as aisleDefaults } from '../aisle-defaults.js';
 import { lookupFamilect } from '../familect.js';
 
@@ -20,6 +20,7 @@ function findAisleLabel(name) {
 import './add-item.js';
 import './grocery-list.js';
 import './share-button.js';
+import './the-nines.js';
 
 const STORAGE_KEY = 'whoredash-list';
 const HISTORY_KEY = 'whoredash-history';
@@ -28,6 +29,7 @@ const BURN_IT_ALL_DOWN = 'BURN IT ALL DOWN';
 export class WhoreDash extends LitElement {
   static properties = {
     _list: { type: Object, state: true },
+    _history: { type: Object, state: true },
   };
 
   static styles = css`
@@ -94,6 +96,14 @@ export class WhoreDash extends LitElement {
   constructor() {
     super();
     this._list = migrateList(localStorage.getItem(STORAGE_KEY));
+    this._history = migrateHistory(localStorage.getItem(HISTORY_KEY));
+  }
+
+  _topNine() {
+    return Object.entries(this._history)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 9)
+      .map(([name]) => name);
   }
 
   _save() {
@@ -101,15 +111,17 @@ export class WhoreDash extends LitElement {
   }
 
   _recordHistory(name) {
-    let history;
-    try {
-      history = JSON.parse(localStorage.getItem(HISTORY_KEY)) ?? {};
-    } catch {
-      history = {};
-    }
-    if (typeof history !== 'object' || Array.isArray(history)) history = {};
-    history[name] = (history[name] ?? 0) + 1;
+    const history = { ...this._history, [name]: (this._history[name] ?? 0) + 1 };
     localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    this._history = history;
+  }
+
+  _removeHistoryItem(e) {
+    const { name } = e.detail;
+    const history = { ...this._history };
+    delete history[name];
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    this._history = history;
   }
 
   _addItem(e) {
@@ -165,6 +177,7 @@ export class WhoreDash extends LitElement {
 
     if (name === BURN_IT_ALL_DOWN) {
       localStorage.removeItem(HISTORY_KEY);
+      this._history = {};
       return;
     }
 
@@ -233,6 +246,11 @@ export class WhoreDash extends LitElement {
 
       <div class="actions">
         <add-item @add-item=${this._addItem} @add-aisle=${this._addAisle}></add-item>
+        <the-nines
+          .suggestions=${this._topNine()}
+          @add-item=${this._addItem}
+          @remove-history-item=${this._removeHistoryItem}
+        ></the-nines>
       </div>
 
       ${isListEmpty(this._list)
