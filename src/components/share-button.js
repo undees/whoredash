@@ -1,5 +1,35 @@
 import { LitElement, html, css } from 'lit';
 
+/**
+ * Formats the list data for sharing.
+ * Accepts either a legacy flat string array or the new structured format
+ * { floatingItems: [{id, name}], aisles: [{id, name, items: [{id, name}]}] }.
+ */
+export function formatShareText(data) {
+  const sections = [];
+
+  if (Array.isArray(data)) {
+    sections.push(data.map(name => `• ${name}`).join('\n'));
+  } else {
+    const { floatingItems = [], aisles = [] } = data;
+    if (floatingItems.length > 0) {
+      sections.push(floatingItems.map(item => `• ${item.name}`).join('\n'));
+    }
+    for (const aisle of aisles) {
+      const itemLines = aisle.items.map(item => `• ${item.name}`).join('\n');
+      sections.push(`❧ ${aisle.name}\n${itemLines}`);
+    }
+  }
+
+  return `🛒 WhoreDash List\n\n${sections.join('\n\n')}`;
+}
+
+export function isListEmpty(data) {
+  if (Array.isArray(data)) return data.length === 0;
+  const { floatingItems = [], aisles = [] } = data;
+  return floatingItems.length === 0 && aisles.every(a => a.items.length === 0);
+}
+
 export class ShareButton extends LitElement {
   static properties = {
     items: { type: Array },
@@ -43,12 +73,15 @@ export class ShareButton extends LitElement {
   }
 
   _formatList() {
-    const lines = this.items.map(item => `• ${item}`);
-    return `🛒 WhoreDash List\n\n${lines.join('\n')}`;
+    return formatShareText(this.items);
+  }
+
+  _isEmpty() {
+    return isListEmpty(this.items);
   }
 
   async _share() {
-    if (this.items.length === 0) return;
+    if (this._isEmpty()) return;
 
     try {
       await navigator.share({
@@ -63,7 +96,7 @@ export class ShareButton extends LitElement {
   }
 
   render() {
-    const empty = this.items.length === 0;
+    const empty = this._isEmpty();
     return html`
       <button ?disabled=${empty} @click=${this._share}>
         Send the Whore Shopping
