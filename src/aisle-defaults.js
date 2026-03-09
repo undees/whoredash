@@ -1,6 +1,17 @@
-// Each entry is [key, aisle] where key is a string (substring match) or RegExp.
-// Matching: all entries that match the lowercased input are collected; the one
-// with the longest match (key.length for strings, match[0].length for regexes) wins.
+/**
+ * @module aisle-defaults
+ * Default item-to-aisle mappings used for auto-assignment when a new item is added.
+ *
+ * Each entry is `[key, aisleLabel]` where `key` is either:
+ * - A **string** — matches when the key is a substring of the lowercased item name.
+ * - A **RegExp** — matched non-anchored against the lowercased item name.
+ *
+ * When multiple entries match, the one with the **longest match** wins
+ * (`key.length` for strings, `match[0].length` for regexes). This lets
+ * specific multi-word keys like `"canned tomatoes"` beat a shorter `"tomatoes"`.
+ *
+ * @type {[string | RegExp, string][]}
+ */
 export const defaults = [
   // Regex entries — handle cases where substring alone is ambiguous
   [/can.+(tomato|tomatoes)/, 'Pantry'],

@@ -1,7 +1,27 @@
+/**
+ * @module the-nines
+ * Quick-add popover showing the nine most-frequently-added items as a 3×3 grid.
+ */
 import { LitElement, html, css } from 'lit';
 
 const GRID_SIZE = 9;
 
+/**
+ * `<the-nines>` — collapsible 3×3 grid of quick-add item buttons, populated
+ * from the user's add history. Empty cells are rendered as ghost placeholders
+ * so the grid shape is always preserved.
+ *
+ * Tapping a filled cell fires `add-item` (identical to typing and pressing Add).
+ * Tapping the ✕ on a cell fires `remove-history-item` so the parent can purge
+ * that entry from history without adding it to the list.
+ *
+ * Hidden entirely when `suggestions` is empty.
+ *
+ * @element the-nines
+ * @prop {string[]} suggestions - Up to 9 item names, pre-sorted by frequency descending.
+ * @fires {CustomEvent<{ name: string }>} add-item - Fired when the user taps a cell to add an item.
+ * @fires {CustomEvent<{ name: string }>} remove-history-item - Fired when the user taps ✕ to remove an item from history.
+ */
 export class TheNines extends LitElement {
   static properties = {
     suggestions: { type: Array },

@@ -1,3 +1,8 @@
+/**
+ * @module grocery-list
+ * Renders the full grocery list with inline editing, aisle management, and
+ * item-move picker. Familect terms receive special visual treatment.
+ */
 import { LitElement, html, css, svg } from 'lit';
 import { lookupFamilect } from '../familect.js';
 
@@ -5,6 +10,22 @@ const undoArrow = svg`<svg width="1em" height="1em" viewBox="0 0 24 24" fill="no
   <path d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"/>
 </svg>`;
 
+/**
+ * `<grocery-list>` — full list renderer. Supports inline renaming of items and
+ * aisles, aisle deletion (items float back to the top), and a per-item aisle
+ * picker for moving items between aisles or back to floating.
+ *
+ * Familect terms are rendered with a sparkle prefix/suffix, a pink background,
+ * and a one-shot shimmer animation, plus a subtitle showing the canonical name.
+ *
+ * @element grocery-list
+ * @prop {import('../utils.js').GroceryList} listData - The list to render.
+ * @fires {CustomEvent<{ id: string }>} remove-item - User tapped the remove button on an item.
+ * @fires {CustomEvent<{ id: string, name: string }>} rename-item - User confirmed an inline item rename.
+ * @fires {CustomEvent<{ id: string, name: string }>} rename-aisle - User confirmed an inline aisle rename.
+ * @fires {CustomEvent<{ id: string }>} delete-aisle - User deleted an aisle (its items float up).
+ * @fires {CustomEvent<{ id: string, aisleId: string | null }>} move-item - User moved an item to a different aisle or back to floating.
+ */
 export class GroceryList extends LitElement {
   static properties = {
     listData: { type: Object },

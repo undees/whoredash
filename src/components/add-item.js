@@ -1,5 +1,20 @@
+/**
+ * @module add-item
+ * Text input and action buttons for adding items and aisles to the list.
+ */
 import { LitElement, html, css } from 'lit';
 
+/**
+ * `<add-item>` — combined input bar for adding grocery items and named aisles.
+ *
+ * The input value is shared between both actions; pressing Enter or clicking
+ * "Add" fires `add-item`, while clicking "+ Aisle" fires `add-aisle`. The
+ * field is cleared automatically after either action.
+ *
+ * @element add-item
+ * @fires {CustomEvent<{ name: string }>} add-item - Fired when the user submits a non-empty item name.
+ * @fires {CustomEvent<{ name: string }>} add-aisle - Fired when the user submits a non-empty aisle name.
+ */
 export class AddItem extends LitElement {
   static properties = {
     _value: { type: String, state: true },

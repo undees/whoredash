@@ -1,8 +1,21 @@
+/**
+ * @module whore-dash
+ * Root application shell. Owns all list and history state, handles every
+ * mutating event from child components, and persists data to localStorage.
+ */
 import { LitElement, html, css } from 'lit';
 import { generateId, migrateList, migrateHistory, emptyList, isListEmpty, moveItemToAisle } from '../utils.js';
 import { defaults as aisleDefaults } from '../aisle-defaults.js';
 import { lookupFamilect } from '../familect.js';
 
+/**
+ * Finds the best-matching aisle label for an item name by scanning
+ * `aisle-defaults`. String keys are matched as substrings; RegExp keys are
+ * matched non-anchored. When multiple entries match, the longest match wins.
+ *
+ * @param {string} name - Canonical item name (post-familect resolution), any case.
+ * @returns {string | null} The aisle label, or `null` if no entry matches.
+ */
 function findAisleLabel(name) {
   const n = name.toLowerCase();
   let bestAisle = null;
@@ -26,6 +39,16 @@ const STORAGE_KEY = 'whoredash-list';
 const HISTORY_KEY = 'whoredash-history';
 const BURN_IT_ALL_DOWN = 'BURN IT ALL DOWN';
 
+/**
+ * `<whore-dash>` — root application shell.
+ *
+ * Manages the canonical `_list` and `_history` state, wires up all child
+ * component events, and persists every mutation to localStorage. Also handles
+ * the "BURN IT ALL DOWN" Easter egg (type the phrase into the aisle name field
+ * to wipe history).
+ *
+ * @element whore-dash
+ */
 export class WhoreDash extends LitElement {
   static properties = {
     _list: { type: Object, state: true },

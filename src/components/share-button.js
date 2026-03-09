@@ -1,6 +1,23 @@
+/**
+ * @module share-button
+ * Share button component and list-formatting utility for the Web Share API.
+ */
 import { LitElement, html, css } from 'lit';
 import { listHasItems } from '../utils.js';
 
+/**
+ * Formats a grocery list as a plain-text string suitable for sharing via SMS,
+ * email, or any other text channel. Handles both the legacy flat-array format
+ * and the current structured format.
+ *
+ * @param {import('../utils.js').GroceryList | string[]} data
+ * @returns {string} Multi-line text with a header, bullet-point items, and
+ *   aisle headings prefixed with ❧.
+ *
+ * @example
+ * formatShareText({ floatingItems: [{ id: '1', name: 'Milk' }], aisles: [] })
+ * // → "🛒 WhoreDash List\n\n• Milk"
+ */
 export function formatShareText(data) {
   const sections = [];
 
@@ -20,6 +37,13 @@ export function formatShareText(data) {
   return `🛒 WhoreDash List\n\n${sections.join('\n\n')}`;
 }
 
+/**
+ * `<share-button>` — full-width button that invokes the Web Share API to send
+ * the current grocery list as plain text. Disabled when the list has no items.
+ *
+ * @element share-button
+ * @prop {import('../utils.js').GroceryList | string[]} items - The current list data.
+ */
 export class ShareButton extends LitElement {
   static properties = {
     items: { type: Object },
