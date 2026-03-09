@@ -3,10 +3,11 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "build": "bun build src/app.js --outdir=public --minify",
-    "dev": "bun build src/app.js --outdir=public --watch",
+    "build": "bun build src/app.js --outdir=public --minify --define 'process.env.NODE_ENV=\"production\"'",
+    "dev": "bun build src/app.js --outdir=public --watch --define 'process.env.NODE_ENV=\"development\"'",
     "test": "bun test",
-    "serve": "bun serve.js"
+    "serve": "bun serve.js",
+    "size": "bun run scripts/payload-size.js"
   },
   "dependencies": {
     "lit": "^3.3.2"
