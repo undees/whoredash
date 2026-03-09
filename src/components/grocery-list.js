@@ -10,6 +10,10 @@ const undoArrow = svg`<svg width="1em" height="1em" viewBox="0 0 24 24" fill="no
   <path d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"/>
 </svg>`;
 
+const upDownArrow = svg`<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M12 3v18M9 7l3-4 3 4M9 17l3 4 3-4"/>
+</svg>`;
+
 /**
  * `<grocery-list>` — full list renderer. Supports inline renaming of items and
  * aisles, aisle deletion (items float back to the top), and a per-item aisle
@@ -210,6 +214,8 @@ export class GroceryList extends LitElement {
 
     .move-btn {
       flex: none;
+      display: flex;
+      align-items: center;
       background: none;
       border: none;
       color: var(--text-muted);
@@ -442,7 +448,7 @@ export class GroceryList extends LitElement {
             aria-label="Move ${item.name} to a different aisle"
             aria-expanded="${isPicking}"
             @click=${() => this._toggleMove(item)}
-          >↕</button>
+          >${upDownArrow}</button>
         ` : ''}
         <button class="item-name" @click=${() => this._startItemEdit(item)} aria-label="Edit ${item.name}">${displayName}</button>
         <button class="remove-btn" @click=${() => this._remove(item.id)} aria-label="Remove ${item.name}">&times;</button>
