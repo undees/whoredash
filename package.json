@@ -10,5 +10,8 @@
   },
   "dependencies": {
     "lit": "^3.3.2"
+  },
+  "devDependencies": {
+    "sharp": "^0.34.5"
   }
 }
