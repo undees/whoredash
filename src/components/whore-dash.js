@@ -37,6 +37,7 @@ import './the-nines.js';
 
 const STORAGE_KEY = 'whoredash-list';
 const HISTORY_KEY = 'whoredash-history';
+const STORE_KEY = 'whoredash-store';
 const BURN_IT_ALL_DOWN = 'BURN IT ALL DOWN';
 
 /**
@@ -53,6 +54,9 @@ export class WhoreDash extends LitElement {
   static properties = {
     _list: { type: Object, state: true },
     _history: { type: Object, state: true },
+    _store: { type: String, state: true },
+    _editingStore: { type: Boolean, state: true },
+    _storeInput: { type: String, state: true },
   };
 
   static styles = css`
@@ -79,6 +83,61 @@ export class WhoreDash extends LitElement {
       font-size: 0.95rem;
       margin-top: 0.25rem;
       font-style: italic;
+    }
+
+    .store-trigger {
+      background: none;
+      border: none;
+      border-bottom: 1.5px dotted var(--pink-400);
+      font: inherit;
+      font-size: inherit;
+      font-style: inherit;
+      color: var(--pink-500);
+      cursor: pointer;
+      padding: 0;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .store-trigger:hover {
+      color: var(--pink-600);
+      border-color: var(--pink-600);
+    }
+
+    .store-edit {
+      display: inline-block;
+      width: 7rem;
+      padding: 0.1rem 0.3rem;
+      border: none;
+      border-bottom: 2px solid var(--pink-400);
+      border-radius: 0;
+      background: transparent;
+      font: inherit;
+      font-size: inherit;
+      font-style: inherit;
+      color: var(--text);
+      text-align: center;
+      outline: none;
+    }
+
+    .store-edit::placeholder {
+      color: var(--text-muted);
+      opacity: 0.6;
+    }
+
+    .store-clear {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font: inherit;
+      font-size: 0.85rem;
+      cursor: pointer;
+      padding: 0 0.15rem;
+      vertical-align: baseline;
+      transition: color 0.15s;
+    }
+
+    .store-clear:hover {
+      color: var(--pink-600);
     }
 
     .actions {
@@ -120,6 +179,9 @@ export class WhoreDash extends LitElement {
     super();
     this._list = migrateList(localStorage.getItem(STORAGE_KEY));
     this._history = migrateHistory(localStorage.getItem(HISTORY_KEY));
+    this._store = localStorage.getItem(STORE_KEY) || '';
+    this._editingStore = false;
+    this._storeInput = '';
   }
 
   _topNine() {
@@ -254,17 +316,90 @@ export class WhoreDash extends LitElement {
     this._save();
   }
 
+  _startStoreEdit() {
+    this._storeInput = this._store;
+    this._editingStore = true;
+  }
+
+  _saveStoreEdit() {
+    if (!this._editingStore) return;
+    const store = this._storeInput.trim();
+    this._store = store;
+    this._editingStore = false;
+    this._storeInput = '';
+    if (store) {
+      localStorage.setItem(STORE_KEY, store);
+    } else {
+      localStorage.removeItem(STORE_KEY);
+    }
+  }
+
+  _cancelStoreEdit() {
+    this._editingStore = false;
+    this._storeInput = '';
+  }
+
+  _clearStore() {
+    this._store = '';
+    this._editingStore = false;
+    this._storeInput = '';
+    localStorage.removeItem(STORE_KEY);
+  }
+
+  _onStoreKeydown(e) {
+    if (e.key === 'Enter') { e.preventDefault(); this._saveStoreEdit(); }
+    else if (e.key === 'Escape') { this._cancelStoreEdit(); }
+  }
+
+  updated(changedProps) {
+    super.updated?.(changedProps);
+    if (changedProps.has('_editingStore') && this._editingStore) {
+      const input = this.shadowRoot.querySelector('.store-edit');
+      if (input) { input.focus(); input.select(); }
+    }
+  }
+
   _clearList() {
     if (isListEmpty(this._list)) return;
     this._list = emptyList();
     this._save();
   }
 
+  _renderTagline() {
+    if (this._editingStore) {
+      return html`Because love is a <input
+        class="store-edit"
+        .value=${this._storeInput}
+        @input=${e => { this._storeInput = e.target.value; }}
+        @keydown=${this._onStoreKeydown}
+        @blur=${this._saveStoreEdit}
+        placeholder="store name"
+        aria-label="Store name"
+      > run.`;
+    }
+    if (this._store) {
+      return html`Because love is a <button
+        class="store-trigger"
+        @click=${this._startStoreEdit}
+        aria-label="Change store"
+      >${this._store}</button><button
+        class="store-clear"
+        @click=${this._clearStore}
+        aria-label="Clear store"
+      >&times;</button> run.`;
+    }
+    return html`Because love is a <button
+      class="store-trigger"
+      @click=${this._startStoreEdit}
+      aria-label="Set store"
+    >grocery</button> run.`;
+  }
+
   render() {
     return html`
       <header>
         <h1>WhoreDash</h1>
-        <p class="tagline">Because love is a grocery run.</p>
+        <p class="tagline">${this._renderTagline()}</p>
       </header>
 
       <div class="actions">
@@ -288,7 +423,7 @@ export class WhoreDash extends LitElement {
           ></grocery-list>`
       }
 
-      <share-button .items=${this._list}></share-button>
+      <share-button .items=${this._list} .store=${this._store}></share-button>
 
       <button class="forget-btn" @click=${this._clearList}>Forget Everything</button>
     `;

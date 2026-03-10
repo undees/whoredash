@@ -44,6 +44,22 @@ describe('formatShareText', () => {
     const data = { floatingItems: [], aisles: [] };
     expect(formatShareText(data)).toBe('🛒 WhoreDash List\n\n');
   });
+
+  test('includes store name in header when provided', () => {
+    const data = {
+      floatingItems: [{ id: 'a1', name: 'Milk' }],
+      aisles: [],
+    };
+    expect(formatShareText(data, 'Farm Boy')).toBe('🛒 WhoreDash List — Farm Boy\n\n• Milk');
+  });
+
+  test('omits store from header when empty string', () => {
+    const data = {
+      floatingItems: [{ id: 'a1', name: 'Milk' }],
+      aisles: [],
+    };
+    expect(formatShareText(data, '')).toBe('🛒 WhoreDash List\n\n• Milk');
+  });
 });
 
 describe('isListEmpty', () => {

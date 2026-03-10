@@ -11,6 +11,7 @@ import { listHasItems } from '../utils.js';
  * and the current structured format.
  *
  * @param {import('../utils.js').GroceryList | string[]} data
+ * @param {string} [store=''] - Optional store name to include in the header.
  * @returns {string} Multi-line text with a header, bullet-point items, and
  *   aisle headings prefixed with ❧.
  *
@@ -18,7 +19,7 @@ import { listHasItems } from '../utils.js';
  * formatShareText({ floatingItems: [{ id: '1', name: 'Milk' }], aisles: [] })
  * // → "🛒 WhoreDash List\n\n• Milk"
  */
-export function formatShareText(data) {
+export function formatShareText(data, store = '') {
   const sections = [];
 
   if (Array.isArray(data)) {
@@ -34,7 +35,10 @@ export function formatShareText(data) {
     }
   }
 
-  return `🛒 WhoreDash List\n\n${sections.join('\n\n')}`;
+  const header = store
+    ? `🛒 WhoreDash List — ${store}`
+    : '🛒 WhoreDash List';
+  return `${header}\n\n${sections.join('\n\n')}`;
 }
 
 /**
@@ -47,6 +51,7 @@ export function formatShareText(data) {
 export class ShareButton extends LitElement {
   static properties = {
     items: { type: Object },
+    store: { type: String },
   };
 
   static styles = css`
@@ -84,10 +89,11 @@ export class ShareButton extends LitElement {
   constructor() {
     super();
     this.items = [];
+    this.store = '';
   }
 
   _formatList() {
-    return formatShareText(this.items);
+    return formatShareText(this.items, this.store);
   }
 
   _isEmpty() {
